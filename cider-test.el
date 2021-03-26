@@ -698,7 +698,6 @@ running them."
                         (setq cider-test-last-summary summary)
                         (setq cider-test-last-results results)
                         (cider-test-highlight-problems results)
-                        (cider-test-echo-summary summary results)
                         (if (or (not (zerop (+ error fail)))
                                 cider-test-show-report-on-success)
                             (cider-test-render-report
@@ -713,7 +712,8 @@ running them."
                                 (erase-buffer)))
                             (cider-test-render-report
                              cider-test-report-buffer
-                             summary results))))))))
+                             summary results)))
+                        (cider-test-echo-summary summary results))))))
            conn))))))
 
 (defun cider-test-rerun-failed-tests ()
