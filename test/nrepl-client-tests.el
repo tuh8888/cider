@@ -3,7 +3,7 @@
 ;; Copyright © 2012-2021 Tim King, Bozhidar Batsov
 
 ;; Author: Tim King <kingtim@gmail.com>
-;;         Bozhidar Batsov <bozhidar@batsov.com>
+;;         Bozhidar Batsov <bozhidar@batsov.dev>
 ;;         Artur Malabarba <bruce.connor.am@gmail.com>
 
 ;; This file is NOT part of GNU Emacs.
@@ -36,7 +36,7 @@
                                    cider-session-name-template)
   (before-all
     (setq default-directory-backup default-directory)
-    (setq default-directory "/path/to/dirA/")
+    (setq default-directory (expand-file-name "/path/to/dirA/"))
     (setq params '(:host "localhost" :port 1))
     (setq cider-session-name-template "%J:%h:%p"))
 
@@ -76,7 +76,7 @@
   :var (default-directory-backup cider-session-name-template)
   (before-all
     (setq default-directory-backup default-directory)
-    (setq default-directory "/path/to/dirA/")
+    (setq default-directory (expand-file-name "/path/to/dirA/"))
     (setq cider-session-name-template "%J:%h:%p"))
 
   (after-all
@@ -165,4 +165,3 @@
              (with-current-buffer nrepl-error-buffer
                (message ":nrepl-lifecycle/error %s" (buffer-string))))
            (error error-details))))))
-

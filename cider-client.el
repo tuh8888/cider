@@ -2,7 +2,7 @@
 
 ;; Copyright © 2013-2021 Bozhidar Batsov
 ;;
-;; Author: Bozhidar Batsov <bozhidar@batsov.com>
+;; Author: Bozhidar Batsov <bozhidar@batsov.dev>
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -209,6 +209,47 @@ buffer, defaults to (cider-current-repl)."
   "Send the INPUT to the nREPL CONNECTION synchronously.
 If NS is non-nil, include it in the eval request."
   (nrepl-sync-request:eval input (or connection (cider-current-repl nil 'ensure)) ns))
+
+(defcustom cider-format-code-options nil
+  "A map of options that will be passed to `cljfmt' to format code.
+Assuming this is the Clojure map you want to use as `cljfmt' options:
+
+  {:indents {org.me/foo [[:inner 0]]}
+   :alias-map {\"me\" \"org.me\"}}
+
+you need to encode it as the following plist:
+
+  '((\"indents\" ((\"org.me/foo\" ((\"inner\" 0))))) (\"alias-map\" ((\"me\" \"org.me\"))))"
+  :type 'list
+  :group 'cider
+  :package-version '(cider . "1.1.0"))
+
+(defun cider--nrepl-format-code-request-map (&optional format-options)
+  "Map to merge into requests that require code formatting.
+If non-nil, FORMAT-OPTIONS specifies the options cljfmt will use to format
+the code.  See `cider-format-code-options` for details."
+  (when format-options
+    (let* ((indents-dict (when (assoc "indents" format-options)
+                           (thread-last
+                               (cadr (assoc "indents" format-options))
+                             (map-pairs)
+                             (seq-mapcat #'identity)
+                             (apply #'nrepl-dict))))
+           (alias-map-dict (when (assoc "alias-map" format-options)
+                             (thread-last
+                                 (cadr (assoc "alias-map" format-options))
+                               (map-pairs)
+                               (seq-mapcat #'identity)
+                               (apply #'nrepl-dict)))))
+      (thread-last
+          (map-merge 'list
+                     (when indents-dict
+                       `(("indents" ,indents-dict)))
+                     (when alias-map-dict
+                       `(("alias-map" ,alias-map-dict))))
+        (map-pairs)
+        (seq-mapcat #'identity)
+        (apply #'nrepl-dict)))))
 
 (defcustom cider-print-fn 'pprint
   "Sets the function to use for printing.
@@ -541,9 +582,10 @@ resolve those to absolute paths."
 
 (defun cider-classpath-entries ()
   "Return a list of classpath entries."
-  (if (cider-nrepl-op-supported-p "classpath")
-      (cider-sync-request:classpath)
-    (cider-fallback-eval:classpath)))
+  (seq-map #'expand-file-name ; normalize filenames for e.g. Windows
+           (if (cider-nrepl-op-supported-p "classpath")
+               (cider-sync-request:classpath)
+             (cider-fallback-eval:classpath))))
 
 (defun cider-sync-request:completion (prefix)
   "Return a list of completions for PREFIX using nREPL's \"completion\" op."
@@ -712,12 +754,19 @@ The result entries are relative to the classpath."
     (cider-nrepl-send-sync-request)
     (nrepl-dict-get "fn-deps")))
 
-(defun cider-sync-request:format-code (code)
-  "Perform nREPL \"format-code\" op with CODE."
-  (thread-first `("op" "format-code"
-                  "code" ,code)
-    (cider-nrepl-send-sync-request)
-    (nrepl-dict-get "formatted-code")))
+(defun cider-sync-request:format-code (code &optional format-options)
+  "Perform nREPL \"format-code\" op with CODE.
+FORMAT-OPTIONS is an optional configuration map for cljfmt."
+  (let* ((request `("op" "format-code"
+                    "options" ,(cider--nrepl-format-code-request-map format-options)
+                    "code" ,code))
+         (response (cider-nrepl-send-sync-request request))
+         (err (nrepl-dict-get response "err")))
+    (when err
+      ;; err will be a stacktrace with a first line that looks like:
+      ;; "clojure.lang.ExceptionInfo: Unmatched delimiter ]"
+      (error (car (split-string err "\n"))))
+    (nrepl-dict-get response "formatted-code")))
 
 (defun cider-sync-request:format-edn (edn right-margin)
   "Perform \"format-edn\" op with EDN and RIGHT-MARGIN."

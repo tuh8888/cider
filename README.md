@@ -7,6 +7,7 @@
 [![MELPA](http://melpa.org/packages/cider-badge.svg)](http://melpa.org/#/cider)
 [![MELPA Stable](http://stable.melpa.org/packages/cider-badge.svg)](http://stable.melpa.org/#/cider)
 [![CircleCI](https://circleci.com/gh/clojure-emacs/cider.svg?style=svg)](https://circleci.com/gh/clojure-emacs/cider)
+[![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://discord.com/invite/nFPpynQPME)
 [![Slack](https://img.shields.io/badge/chat-%23cider-green.svg?style=flat)](http://clojurians.net)
 
 CIDER is the **C**lojure(Script) **I**nteractive **D**evelopment **E**nvironment
@@ -36,7 +37,7 @@ CIDER and the [numerous related projects](https://metaredux.com/posts/2018/11/09
 
 The instructions that follow are meant to get you from zero to a running CIDER
 REPL in under 5 minutes.  See the
-[user manual](https://docs.cider.mx) for (way) more
+[online documentation](https://docs.cider.mx) for (way) more
 details.
 
 ### Installation
