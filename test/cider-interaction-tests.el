@@ -104,14 +104,6 @@
           (clojure-mode)
           (expect (cider-interactive-eval "(+ 1)") :not :to-throw))))))
 
-(describe "cider--calculate-opening-delimiters"
-  (it "returns the right opening delimiters"
-    (with-temp-buffer
-      (clojure-mode)
-      (insert "(let [a 1] (let [b 2] (+ a b)))")
-      (backward-char 2)
-      (expect (cider--calculate-opening-delimiters) :to-equal '(40 40)))))
-
 (describe "cider--matching-delimiter"
   (it "returns the right closing delimiter"
     (expect (cider--matching-delimiter ?\() :to-equal ?\))
@@ -121,3 +113,8 @@
     (expect (cider--matching-delimiter ?\)) :to-equal ?\()
     (expect (cider--matching-delimiter ?\}) :to-equal ?\{)
     (expect (cider--matching-delimiter ?\]) :to-equal ?\[)))
+
+(describe "cider--insert-closing-delimiters"
+  (it "appends any matching closing delimiters"
+    (expect (cider--insert-closing-delimiters "(let [a 1] (prn 1 [2 {3 4")
+            :to-equal "(let [a 1] (prn 1 [2 {3 4}]))")))

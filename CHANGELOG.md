@@ -4,11 +4,23 @@
 
 ### New features
 
+* [#2831](https://github.com/clojure-emacs/cider/issues/2831): Add xref integration, configured with customizable variables cider-use-xref and cider-xref-fn-depth.
 * [#3017](https://github.com/clojure-emacs/cider/issues/3017): Annotate company completion kinds.
+* [#3040](https://github.com/clojure-emacs/cider/pull/3040): Support invoking `cider-clojuredocs` within the `*clojuredocs*` buffer.
+* Make it possible to specify the version of `cider-nrepl` to use with `cider-jack-in`. See `cider-injected-middleware-version`.
+* Make it possible to specify the version of nREPL to use with `cider-jack-in`. See `cider-injected-nrepl-version`.
+* Upgrade `cider-nrepl`, `Orchard` and `clj-suitable` for pulling their latest bugfixes.
 
 ### Bugs fixed
 
+* [#3022](https://github.com/clojure-emacs/cider/issues/3022): Handle empty stacktraces, pointing users to docs about the OmitStackTraceInFastThrow JVM optimization.
 * [#3020](https://github.com/clojure-emacs/cider/issues/3020): Fix session linking on Windows, e.g. when jumping into a library on the classpath.
+* [#3031](https://github.com/clojure-emacs/cider/pull/3031): Fix `cider-eval-defun-up-to-point` failing to match delimiters correctly in some cases, resulting in reader exceptions.
+* [#3039](https://github.com/clojure-emacs/cider/pull/3039): Allow starting the sideloader for the tooling session.
+* [#3041](https://github.com/clojure-emacs/cider/pull/3041): Sideloader: handle binary files, support multiple directories
+* [#3044](https://github.com/clojure-emacs/cider/pull/3044): Dynamically upgrade nREPL connection
+* [#3047](https://github.com/clojure-emacs/cider/pull/3047): Fix info/lookup fallback: response has an extra level
+* [#2746](https://github.com/clojure-emacs/cider/issues/2746): Handle gracefully Clojure versions with non-standard qualifiers (e.g. `1.11.0-master-SNAPSHOT`).
 
 ## 1.1.1 (2021-05-24)
 

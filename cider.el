@@ -12,7 +12,7 @@
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: http://www.github.com/clojure-emacs/cider
 ;; Version: 1.2.0-snapshot
-;; Package-Requires: ((emacs "25") (clojure-mode "5.12") (parseedn "0.2") (pkg-info "0.4") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2"))
+;; Package-Requires: ((emacs "26") (clojure-mode "5.12") (parseedn "1.0.4") (pkg-info "0.4") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2"))
 ;; Keywords: languages, clojure, cider
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -381,10 +381,18 @@ Throws an error if PROJECT-TYPE is unknown."
 (defvar cider-jack-in-dependencies nil
   "List of dependencies where elements are lists of artifact name and version.")
 (put 'cider-jack-in-dependencies 'risky-local-variable t)
-;; We inject the newest known version of nREPL just in case
-;; your version of Boot or Leiningen is bundling an older one.
+
+(defcustom cider-injected-nrepl-version "0.9.0-beta3"
+  "The version of nREPL injected on jack-in.
+We inject the newest known version of nREPL just in case
+your version of Boot or Leiningen is bundling an older one."
+  :type 'string
+  :group 'cider
+  :package-version '(cider . "1.2.0")
+  :safe #'stringp)
+
 (cider-add-to-alist 'cider-jack-in-dependencies
-                    "nrepl/nrepl" "0.9.0-beta1")
+                    "nrepl/nrepl" cider-injected-nrepl-version)
 
 (defvar cider-jack-in-cljs-dependencies nil
   "List of dependencies where elements are lists of artifact name and version.
@@ -406,8 +414,16 @@ Elements of the list are artifact name and list of exclusions to apply for the a
 (defconst cider-latest-clojure-version "1.10.1"
   "Latest supported version of Clojure.")
 
-(defconst cider-required-middleware-version "0.26.0"
+(defconst cider-required-middleware-version "0.27.2"
   "The CIDER nREPL version that's known to work properly with CIDER.")
+
+(defcustom cider-injected-middleware-version cider-required-middleware-version
+  "The version of cider-nrepl injected on jack-in.
+Should be newer than the required version for optimal results."
+  :type 'string
+  :group 'cider
+  :package-version '(cider . "1.2.0")
+  :safe #'stringp)
 
 (defcustom cider-jack-in-auto-inject-clojure nil
   "Version of clojure to auto-inject into REPL.
@@ -436,7 +452,7 @@ that extend CIDER, not for users.  For example, a refactoring package might
 want to inject some middleware only when within a project context.)")
 (put 'cider-jack-in-lein-plugins 'risky-local-variable t)
 (cider-add-to-alist 'cider-jack-in-lein-plugins
-                    "cider/cider-nrepl" cider-required-middleware-version)
+                    "cider/cider-nrepl" cider-injected-middleware-version)
 
 (defvar cider-jack-in-cljs-lein-plugins nil
   "List of Leiningen plugins to be injected at jack-in.

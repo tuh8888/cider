@@ -201,7 +201,10 @@ FORMAT is a format string to compile with ARGS and display on the REPL."
 (defvar cider-minimum-clojure-version)
 (defun cider--check-clojure-version-supported ()
   "Ensure that we are meeting the minimum supported version of Clojure."
-  (if-let* ((clojure-version (cider--clojure-version)))
+  (if-let* ((clojure-version (cider--clojure-version))
+            ;; drop all qualifiers from the version string
+            ;; e.g. 1.10.0-master-SNAPSHOT becomes simply 1.10.0
+            (clojure-version (car (split-string clojure-version "-"))))
       (when (version< clojure-version cider-minimum-clojure-version)
         (cider-emit-manual-warning "basics/installation.html#prerequisites"
                                    "Clojure version (%s) is not supported (minimum %s). CIDER will not work."
@@ -699,7 +702,7 @@ Session name can be customized with `cider-session-name-template'."
 ;;; REPL Buffer Init
 
 (defvar-local cider-cljs-repl-type nil
-  "The type of the ClojureScript runtime (Browser, Node, Figwheel, etc.)")
+  "The type of the ClojureScript runtime (Browser, Node, Figwheel, etc.).")
 
 (defvar-local cider-repl-type nil
   "The type of this REPL buffer, usually either clj or cljs.")

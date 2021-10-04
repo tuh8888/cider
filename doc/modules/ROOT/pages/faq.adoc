@@ -8,9 +8,17 @@ CIDER stands for **C**lojure **I**nteractive **D**evelopment **E**nvironment tha
 
 Yes.
 
+== Is "jack-in" a reference to "Neuromancer"?
+
+Yes.
+
+== Is "jack-in" a reference to "The Matrix"?
+
+Yes.
+
 == What are CIDER's installation prerequisites?
 
-CIDER officially supports Emacs 25.1+, Java 8+ and Clojure(Script) 1.8+.
+CIDER officially supports Emacs 26.1+, Java 8+ and Clojure(Script) 1.8+.
 
 NOTE: CIDER 0.17 was the final release which supported Java 7 and Clojure(Script) 1.7.
 
@@ -51,6 +59,10 @@ maintainer (Bozhidar).
 TIP: Bozhidar really loves Spain and the West Coast of the US, so he tends
 to name really special releases with codenames related to them (e.g.
 Seattle, California, Andalucia, etc).
+
+== Why is CIDER's website using a .mx domain?
+
+Because that's the https://emacsredux.com/blog/2018/11/17/the-perfect-domain-for-emacs-projects/[perfect domain for Emacs projects].
 
 == Is using CIDER a good idea if I'm new to both Emacs and Clojure?
 
