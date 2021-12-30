@@ -1,4 +1,4 @@
-;;; nrepl-client-tests.el
+;;; nrepl-client-tests.el  -*- lexical-binding: t; -*-
 
 ;; Copyright © 2012-2021 Tim King, Bozhidar Batsov
 
@@ -29,7 +29,7 @@
 
 (require 'buttercup)
 (require 'nrepl-client)
-(require 'nrepl-tests-utils)
+(require 'nrepl-tests-utils "test/utils/nrepl-tests-utils")
 
 (describe "nrepl-server-buffer-name"
   :var (nrepl-hide-special-buffers params default-directory-backup
@@ -111,6 +111,32 @@
         (expect (nrepl-make-buffer-name "*buff-name %r:%S*" params)
                 :to-equal "*buff-name cljs*")))))
 
+(describe "nrepl-parse-port"
+  (it "standard"
+      (let ((msg "nREPL server started on port 58882 on host kubernetes.docker.internal - nrepl://kubernetes.docker.internal:58882"))
+        (expect (string-match nrepl-listening-address-regexp msg)
+                :not :to-be nil)
+        (expect (match-string 1 msg)
+                :to-equal "58882")
+        (expect (match-string 2 msg)
+                :to-be nil)))
+  (it "babashka"
+      (let ((msg "Started nREPL server at 127.0.0.1:1667"))
+        (expect (string-match nrepl-listening-address-regexp msg)
+                :not :to-be nil)
+        (expect (match-string 1 msg)
+                :to-equal "1667")
+        (expect (match-string 2 msg)
+                :to-equal "127.0.0.1")))
+    (it "shadow"
+      (let ((msg "shadow-cljs - nREPL server started on port 50999"))
+        (expect (string-match nrepl-listening-address-regexp msg)
+                :not :to-be nil)
+        (expect (match-string 1 msg)
+                :to-equal "50999")
+        (expect (match-string 2 msg)
+                :to-be nil))))
+
 (describe "nrepl-client-lifecycle"
   (it "start and stop nrepl client process"
 
@@ -142,7 +168,8 @@
                                     (plist-get server-endpoint :port)
                                     server-process
                                     (lambda (client-endpoint)
-                                      client-buffer))))
+                                      client-buffer)
+                                    (plist-get server-endpoint :socket-file))))
 
               ;; client connection is open
               (expect (process-status process-client)

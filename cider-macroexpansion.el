@@ -33,7 +33,6 @@
 
 (require 'cider-mode)
 (require 'subr-x)
-(require 'cider-compat)
 
 (defconst cider-macroexpansion-buffer "*cider-macroexpansion*")
 
@@ -83,7 +82,7 @@ ARG is passed along to `undo-only'."
     (undo-only arg)))
 
 (defvar cider-last-macroexpand-expression nil
-  "Specify the last macroexpansion preformed.
+  "Specify the last macroexpansion performed.
 This variable specifies both what was expanded and the expander.")
 
 (defun cider-macroexpand-expr (expander expr)
@@ -143,7 +142,7 @@ If invoked with a PREFIX argument, use \\=`macroexpand\\=` instead of
     (erase-buffer)
     (insert (format "%s" expansion))
     (goto-char (point-max))
-    (cider--font-lock-ensure)))
+    (font-lock-ensure)))
 
 (defun cider-redraw-macroexpansion-buffer (expansion buffer start end)
   "Redraw the macroexpansion with new EXPANSION.
@@ -194,12 +193,8 @@ and point is placed after the expanded form."
     map))
 
 (define-minor-mode cider-macroexpansion-mode
-  "Minor mode for CIDER macroexpansion.
-
-\\{cider-macroexpansion-mode-map}"
-  nil
-  " Macroexpand"
-  cider-macroexpansion-mode-map)
+  "Minor mode for CIDER macroexpansion."
+  :lighter " Macroexpand")
 
 (provide 'cider-macroexpansion)
 

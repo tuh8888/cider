@@ -52,7 +52,6 @@
 
 (require 'cider-client)
 (require 'cider-common)
-(require 'cider-compat)
 (require 'cider-jar)
 (require 'cider-overlays)
 (require 'cider-popup)
@@ -190,6 +189,17 @@ When invoked with a prefix ARG the command doesn't prompt for confirmation."
 
 
 ;;; Sideloader
+;;
+;; nREPL includes sideloader middleware which provides a Java classloader that
+;; is able to dynamically load classes and resources at runtime by interacting
+;; with the nREPL client (as opposed to using the classpath of the JVM hosting
+;; nREPL server).
+;;
+;; This performs a similar functionality as the load-file
+;; operation, where we can load Clojure namespaces (as source files) or Java
+;; classes (as bytecode) by simply requiring or importing them.
+;;
+;; See https://nrepl.org/nrepl/design/middleware.html#sideloading
 
 (defcustom cider-sideloader-path nil
   "List of directories and jar files to scan for sideloader resources.
@@ -197,14 +207,14 @@ When not set the cider-nrepl jar will be added automatically when upgrading
 an nREPL connection."
   :type 'list
   :group 'cider
-  :package-version '(cider . "0.27.0"))
+  :package-version '(cider . "1.2.0"))
 
 (defcustom cider-dynload-cider-nrepl-version nil
   "Version of the cider-nrepl jar used for dynamically upgrading a connection.
-Defaults to `cider-required-middleware-version'"
+Defaults to `cider-required-middleware-version'."
   :type 'string
   :group 'cider
-  :package-version '(cider . "0.27.0"))
+  :package-version '(cider . "1.2.0"))
 
 (defun cider-read-bytes (path)
   "Read binary data from PATH.
@@ -263,7 +273,7 @@ CONTINUE is an optional continuation function."
 (defun cider-request:sideloader-start (&optional connection tooling)
   "Perform the nREPL \"sideloader-start\" op.
 If CONNECTION is nil, use `cider-current-repl'.
-If TOOLING is truthy then the operation is perfomed over the tooling
+If TOOLING is truthy then the operation is performed over the tooling
 session, rather than the regular session."
   (cider-ensure-op-supported "sideloader-start")
   (cider-nrepl-send-request `("op" "sideloader-start")
@@ -324,7 +334,7 @@ If CONNECTION is nil, use `cider-current-repl'."
 - If CONNECTION is nil, use `cider-current-repl'.
 - If TOOLING it truthy, use the tooling session instead of the main session.
 - CONTINUE is an optional continuation function, which will be called when the
-add-middleware op has finished succesfully."
+add-middleware op has finished successfully."
   (cider-nrepl-send-request `("op" "add-middleware"
                               "middleware" ,middlewares)
                             (cider-add-middleware-handler continue)
@@ -520,10 +530,12 @@ It delegates the actual error content to the eval or op handler."
                                   " - "))
 
 
-(defconst cider-clojure-compilation-regexp (eval
-                                            `(rx bol (or ,cider-clojure-1.9-error
-                                                         ,cider-clojure-warning
-                                                         ,cider-clojure-1.10-error))))
+(defconst cider-clojure-compilation-regexp
+  (eval
+   `(rx bol (or ,cider-clojure-1.9-error
+                ,cider-clojure-warning
+                ,cider-clojure-1.10-error))
+   t))
 
 
 (defvar cider-compilation-regexp
@@ -1391,13 +1403,13 @@ Useful when the running nREPL on remote host."
   (mapcar #'cider-load-file
           (directory-files-recursively directory "\\.clj[cs]?$")))
 
-(defalias 'cider-eval-file 'cider-load-file
+(defalias 'cider-eval-file #'cider-load-file
   "A convenience alias as some people are confused by the load-* names.")
 
-(defalias 'cider-eval-all-files 'cider-load-all-files
+(defalias 'cider-eval-all-files #'cider-load-all-files
   "A convenience alias as some people are confused by the load-* names.")
 
-(defalias 'cider-eval-buffer 'cider-load-buffer
+(defalias 'cider-eval-buffer #'cider-load-buffer
   "A convenience alias as some people are confused by the load-* names.")
 
 (defun cider-load-all-project-ns ()

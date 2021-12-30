@@ -2,25 +2,47 @@
 
 ## master (unreleased)
 
+### Bugs fixed
+
+* Upgrade [enrich-classpath](https://github.com/clojure-emacs/enrich-classpath), which fixes various edge cases.
+  * Remember: at the moment the enrich-classpath is disabled by default. It will soon be enabled again. If you wish to try it out, you can customize `cider-enrich-classpath` to `t`.
+  * Also remember: for it to work, on Linux, you'll also have to do something like `sudo apt install openjdk-11-source` (depending on your package manager and JDK of choice).
+
+## 1.2.0 (2021-12-22)
+
 ### New features
 
-* [#2831](https://github.com/clojure-emacs/cider/issues/2831): Add xref integration, configured with customizable variables cider-use-xref and cider-xref-fn-depth.
+* Integrate [enrich-classpath](https://github.com/clojure-emacs/enrich-classpath) by default for Leiningen projects.
+  * This enables functionality related to Java sources, javadocs or parsing thereof.
+  * This can slightly slow down jack-in for the _first_ time for a given project; later on the related work will be cached.
+  * The feature is experimental at this point and needs to be enabled with `(setq cider-enrich-classpath t)`.
+* [#2831](https://github.com/clojure-emacs/cider/issues/2831): Add `xref` integration, configured with customizable variables `cider-use-xref` and `cider-xref-fn-depth`.
 * [#3017](https://github.com/clojure-emacs/cider/issues/3017): Annotate company completion kinds.
 * [#3040](https://github.com/clojure-emacs/cider/pull/3040): Support invoking `cider-clojuredocs` within the `*clojuredocs*` buffer.
 * Make it possible to specify the version of `cider-nrepl` to use with `cider-jack-in`. See `cider-injected-middleware-version`.
 * Make it possible to specify the version of nREPL to use with `cider-jack-in`. See `cider-injected-nrepl-version`.
 * Upgrade `cider-nrepl`, `Orchard` and `clj-suitable` for pulling their latest bugfixes.
+* Add support for babaska projects to `cider-jack-in`.
+* Introduce `cider-jack-in-lein-middlewares` defcustom.
+* [#3093](https://github.com/clojure-emacs/cider/pull/3093): Make `see-also`s clickable in ClojureDocs buffers.
+* [#3044](https://github.com/clojure-emacs/cider/pull/3044): Dynamically upgrade nREPL connection. See `cider-upgrade-nrepl-connection`.
 
 ### Bugs fixed
 
-* [#3022](https://github.com/clojure-emacs/cider/issues/3022): Handle empty stacktraces, pointing users to docs about the OmitStackTraceInFastThrow JVM optimization.
+* [#3022](https://github.com/clojure-emacs/cider/issues/3022): Handle empty stacktraces, pointing users to docs about the `OmitStackTraceInFastThrow` JVM optimization.
 * [#3020](https://github.com/clojure-emacs/cider/issues/3020): Fix session linking on Windows, e.g. when jumping into a library on the classpath.
 * [#3031](https://github.com/clojure-emacs/cider/pull/3031): Fix `cider-eval-defun-up-to-point` failing to match delimiters correctly in some cases, resulting in reader exceptions.
 * [#3039](https://github.com/clojure-emacs/cider/pull/3039): Allow starting the sideloader for the tooling session.
-* [#3041](https://github.com/clojure-emacs/cider/pull/3041): Sideloader: handle binary files, support multiple directories
-* [#3044](https://github.com/clojure-emacs/cider/pull/3044): Dynamically upgrade nREPL connection
-* [#3047](https://github.com/clojure-emacs/cider/pull/3047): Fix info/lookup fallback: response has an extra level
+* [#3041](https://github.com/clojure-emacs/cider/pull/3041): Sideloader: handle binary files, support multiple directories.
+* [#3047](https://github.com/clojure-emacs/cider/pull/3047): Fix info/lookup fallback: response has an extra level.
 * [#2746](https://github.com/clojure-emacs/cider/issues/2746): Handle gracefully Clojure versions with non-standard qualifiers (e.g. `1.11.0-master-SNAPSHOT`).
+* [#3069](https://github.com/clojure-emacs/cider/pull/3069): Fix cursor color changing when it shouldn't in `evil-mode`.
+* [#3071](https://github.com/clojure-emacs/cider/issues/3071): Use `xref` instead of `etags` to push point to marker stack.
+* [#3074](https://github.com/clojure-emacs/cider/issues/3074): Recognize `pwsh` as a `powershell` executable.
+
+### Changes
+
+* Drop support for Emacs 25 (this tracks upstream deps like `parseedn` that no longer support Emacs 25 and is line with our compatibility policy for RHEL and Debian).
 
 ## 1.1.1 (2021-05-24)
 
@@ -561,7 +583,7 @@ within the scope of your current Emacs session.
 
 * [#1677](https://github.com/clojure-emacs/cider/issues/1677): Interpret `\r` as a newline.
 * [#1819](https://github.com/clojure-emacs/cider/issues/1819): Handle properly missing commands on `cider-jack-in`.
-* Add option to define exclusions for injected dependecies. Fixes [#1824](https://github.com/clojure-emacs/cider/issues/1824): Can no longer jack-in to an inherited clojure version.
+* Add option to define exclusions for injected dependencies. Fixes [#1824](https://github.com/clojure-emacs/cider/issues/1824): Can no longer jack-in to an inherited clojure version.
 * [#1820](https://github.com/clojure-emacs/cider/issues/1820): Don't try to display eldoc in EDN buffers.
 * [#1823](https://github.com/clojure-emacs/cider/issues/1823): Fix column location metadata set by interactive evaluation.
 * [#1859](https://github.com/clojure-emacs/cider/issues/1859): Make nREPL message log much faster. `nrepl-dict-max-message-size` custom variable was removed.
@@ -789,7 +811,7 @@ and try to associate the created connection with this project automatically.
 * [#1187](https://github.com/clojure-emacs/cider/pull/1187): The list of keys displayed by the debugger can be configured with `cider-debug-prompt`.
 * [#1187](https://github.com/clojure-emacs/cider/pull/1187): While debugging, there is a menu on the menu-bar listing available commands.
 * [#1184](https://github.com/clojure-emacs/cider/pull/1184): When the user kills the REPL buffer, CIDER will offer to kill the nrepl buffer and process too. Also, when the client (repl) process dies, the server (nrepl) process is killed too.
-* [#1182](https://github.com/clojure-emacs/cider/pull/1182): New command `cider-browse-instrumented-defs`, displays a buffer listing all defitions currently instrumented by the debugger.
+* [#1182](https://github.com/clojure-emacs/cider/pull/1182): New command `cider-browse-instrumented-defs`, displays a buffer listing all definitions currently instrumented by the debugger.
 * [#1182](https://github.com/clojure-emacs/cider/pull/1182): Definitions currently instrumented by the debugger are marked with a red box in the source buffer.
 * [#1174](https://github.com/clojure-emacs/cider/pull/1174): New command `cider-run`, runs the project's `-main` function.
 * [#1176](https://github.com/clojure-emacs/cider/pull/1176): While debugging, cider's usual eval commands will evaluate code in the current lexical context. Additionally, the <kbd>l</kbd> key now inspects local variables.
@@ -837,7 +859,7 @@ and try to associate the created connection with this project automatically.
 
 ### Bugs fixed
 
-* [#1142](https://github.com/clojure-emacs/cider/issues/1142): Don't retrive nrepl ports when `cider-known-endpoints` entry already contains the port.
+* [#1142](https://github.com/clojure-emacs/cider/issues/1142): Don't retrieve nrepl ports when `cider-known-endpoints` entry already contains the port.
 * [#1153](https://github.com/clojure-emacs/cider/pull/1153): Fix behavior of `cider-switch-to-current-repl-buffer`.
 * [#1139](https://github.com/clojure-emacs/cider/issues/1139): Fix evaluation of ns forms and of forms with unevaluated namespaces.
 * Replace `assert` with `cl-assert` (we don't use anything from `cl` now).

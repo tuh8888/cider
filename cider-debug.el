@@ -37,7 +37,6 @@
 (require 'cider-inspector)
 (require 'cider-util)
 (require 'cider-common)
-(require 'cider-compat)
 (require 'nrepl-client) ; `nrepl--mark-id-completed'
 (require 'nrepl-dict)
 
@@ -53,13 +52,11 @@
   '((((class color) (background light)) :background "grey80")
     (((class color) (background dark))  :background "grey30"))
   "Face used to mark code being debugged."
-  :group 'cider-debug
   :package-version '(cider . "0.9.1"))
 
 (defface cider-debug-prompt-face
   '((t :underline t :inherit font-lock-builtin-face))
   "Face used to highlight keys in the debug prompt."
-  :group 'cider-debug
   :package-version '(cider . "0.10.0"))
 
 (defface cider-enlightened-face
@@ -69,14 +66,12 @@
      ;; "#dd0" is a dimmer yellow.
      :box (:color "#990" :line-width -1)))
   "Face used to mark enlightened sexps and their return values."
-  :group 'cider-debug
   :package-version '(cider . "0.11.0"))
 
 (defface cider-enlightened-local-face
   '((((class color) (background light)) :weight bold :foreground "darkorange")
     (((class color) (background dark))  :weight bold :foreground "yellow"))
   "Face used to mark enlightened locals (not their values)."
-  :group 'cider-debug
   :package-version '(cider . "0.11.0"))
 
 (defcustom cider-debug-prompt 'overlay
@@ -89,11 +84,10 @@ If nil, don't list available keys at all."
                  (const :tag "Show above function" overlay)
                  (const :tag "Show in both places" t)
                  (const :tag "Don't list keys" nil))
-  :group 'cider-debug
   :package-version '(cider . "0.10.0"))
 
 (defcustom cider-debug-use-overlays t
-  "Whether to higlight debugging information with overlays.
+  "Whether to highlight debugging information with overlays.
 Takes the same possible values as `cider-use-overlays', but only applies to
 values displayed during debugging sessions.
 To control the overlay that lists possible keys above the current function,
@@ -101,7 +95,6 @@ configure `cider-debug-prompt' instead."
   :type '(choice (const :tag "End of line" t)
                  (const :tag "Bottom of screen" nil)
                  (const :tag "Both" both))
-  :group 'cider-debug
   :package-version '(cider . "0.9.1"))
 
 (make-obsolete 'cider-debug-print-length 'cider-debug-print-options "0.20")
@@ -193,7 +186,6 @@ Set by `cider--turn-on-debug-mode'.")
   "If non-nil, local variables are displayed while debugging.
 Can be toggled at any time with `\\[cider-debug-toggle-locals]'."
   :type 'boolean
-  :group 'cider-debug
   :package-version '(cider . "0.10.0"))
 
 (defcustom cider-debug-prompt-commands
@@ -224,7 +216,6 @@ The rest of the commands are displayed in the same order as this list."
                 :value-type (list
                              (string :tag "command name")
                              (choice (string :tag "display name") nil)))
-  :group 'cider-debug
   :package-version '(cider . "0.24.0"))
 
 (defun cider--debug-format-locals-list (locals)
@@ -242,7 +233,7 @@ Each element of LOCALS should be a list of at least two elements."
     ""))
 
 (defun cider--debug-propertize-prompt-commands ()
-  "In-place formatting of the command display names for the `cider-debug-prompt' overlay."
+  "In-place format the command display names for the `cider-debug-prompt' overlay."
   (mapc (lambda (spec)
           (cl-destructuring-bind (char _cmd disp-name) spec
             (when-let* ((pos (cl-position char disp-name)))
@@ -494,7 +485,7 @@ REASON is a keyword describing why this buffer was necessary."
                     reason
                     ".")
             (fill-paragraph))
-          (cider--font-lock-ensure)
+          (font-lock-ensure)
           (set-buffer-modified-p nil))))
     (switch-to-buffer buffer-name)
     (goto-char (point-min))))

@@ -1,4 +1,4 @@
-;;; cider-tests.el
+;;; cider-tests.el  -*- lexical-binding: t; -*-
 
 ;; Copyright © 2012-2021 Tim King, Bozhidar Batsov
 
@@ -114,7 +114,8 @@
       (setq-local cider-jack-in-dependencies '(("nrepl/nrepl" "0.5.3")))
       (setq-local cider-jack-in-nrepl-middlewares '("cider.nrepl/cider-middleware"))
       (setq-local cider-jack-in-lein-plugins '(("cider/cider-nrepl" "0.10.0-SNAPSHOT")))
-      (setq-local cider-jack-in-dependencies-exclusions '()))
+      (setq-local cider-jack-in-dependencies-exclusions '())
+      (setq-local cider-enrich-classpath t))
 
     (it "can inject dependencies in a lein project"
       (expect (cider-inject-jack-in-dependencies "" "repl :headless" 'lein)
@@ -122,6 +123,9 @@
                                 (shell-quote-argument "[nrepl/nrepl \"0.5.3\"]")
                                 " -- update-in :plugins conj "
                                 (shell-quote-argument "[cider/cider-nrepl \"0.10.0-SNAPSHOT\"]")
+                                " -- update-in :plugins conj "
+                                (shell-quote-argument "[mx.cider/enrich-classpath \"1.6.2\"]")
+                                " -- update-in :middleware conj cider.enrich-classpath/middleware"
                                 " -- repl :headless")))
 
     (it "can inject dependencies in a lein project with an exclusion"
@@ -132,6 +136,9 @@
                          (shell-quote-argument "[nrepl/nrepl \"0.5.3\" :exclusions [org.clojure/clojure]]")
                          " -- update-in :plugins conj "
                          (shell-quote-argument "[cider/cider-nrepl \"0.10.0-SNAPSHOT\"]")
+                         " -- update-in :plugins conj "
+                         (shell-quote-argument "[mx.cider/enrich-classpath \"1.6.2\"]")
+                         " -- update-in :middleware conj cider.enrich-classpath/middleware"
                          " -- repl :headless")))
 
     (it "can inject dependencies in a lein project with multiple exclusions"
@@ -141,6 +148,9 @@
                                 (shell-quote-argument "[nrepl/nrepl \"0.5.3\" :exclusions [org.clojure/clojure foo.bar/baz]]")
                                 " -- update-in :plugins conj "
                                 (shell-quote-argument "[cider/cider-nrepl \"0.10.0-SNAPSHOT\"]")
+                                " -- update-in :plugins conj "
+                                (shell-quote-argument "[mx.cider/enrich-classpath \"1.6.2\"]")
+                                " -- update-in :middleware conj cider.enrich-classpath/middleware"
                                 " -- repl :headless")))
 
     (it "can inject dependencies in a boot project"
@@ -173,6 +183,9 @@
                                 (shell-quote-argument "[refactor-nrepl \"2.0.0\"]")
                                 " -- update-in :plugins conj "
                                 (shell-quote-argument "[cider/cider-nrepl \"0.11.0\"]")
+                                " -- update-in :plugins conj "
+                                (shell-quote-argument "[mx.cider/enrich-classpath \"1.6.2\"]")
+                                " -- update-in :middleware conj cider.enrich-classpath/middleware"
                                 " -- repl :headless")))
 
     (it "can inject dependencies in a boot project"
@@ -203,6 +216,9 @@
                                 (shell-quote-argument "[nrepl/nrepl \"0.5.3\"]")
                                 " -- update-in :plugins conj "
                                 (shell-quote-argument "[cider/cider-nrepl \"0.11.0\"]")
+                                " -- update-in :plugins conj "
+                                (shell-quote-argument "[mx.cider/enrich-classpath \"1.6.2\"]")
+                                " -- update-in :middleware conj cider.enrich-classpath/middleware"
                                 " -- repl :headless")))
     (it "can concat in a boot project"
       (expect (cider-inject-jack-in-dependencies "-C -o" "repl -s wait" 'boot)
@@ -259,12 +275,14 @@
       (cider-jack-in-normalized-nrepl-middlewares)
       (expect 'middlewares-predicate :to-have-been-called-times 1)))
 
-  (describe "when the middleware and plugin lists have been normalized"
+  (describe "when the middleware and plugin lists have been normalized (Lein)"
     (before-each
       (spy-on 'cider-jack-in-normalized-nrepl-middlewares
               :and-return-value '("refactor-nrepl.middleware/wrap-refactor" "cider.nrepl/cider-middleware"))
       (spy-on 'cider-jack-in-normalized-lein-plugins
-              :and-return-value '(("refactor-nrepl" "2.0.0") ("cider/cider-nrepl" "0.11.0")))
+              :and-return-value '(("refactor-nrepl" "2.0.0")
+                                  ("cider/cider-nrepl" "0.11.0")
+                                  ("mx.cider/enrich-classpath" "1.6.2")))
       (setq-local cider-jack-in-dependencies-exclusions '()))
     (it "uses them in a lein project"
       (expect (cider-inject-jack-in-dependencies "" "repl :headless" 'lein)
@@ -274,7 +292,19 @@
                                 (shell-quote-argument "[refactor-nrepl \"2.0.0\"]")
                                 " -- update-in :plugins conj "
                                 (shell-quote-argument "[cider/cider-nrepl \"0.11.0\"]")
-                                " -- repl :headless")))
+                                " -- update-in :plugins conj "
+                                (shell-quote-argument "[mx.cider/enrich-classpath \"1.6.2\"]")
+                                " -- update-in :middleware conj cider.enrich-classpath/middleware"
+                                " -- repl :headless"))))
+
+  (describe "when the middleware and plugin lists have been normalized (Boot)"
+    (before-each
+      (spy-on 'cider-jack-in-normalized-nrepl-middlewares
+              :and-return-value '("refactor-nrepl.middleware/wrap-refactor" "cider.nrepl/cider-middleware"))
+      (spy-on 'cider-jack-in-normalized-lein-plugins
+              :and-return-value '(("refactor-nrepl" "2.0.0")
+                                  ("cider/cider-nrepl" "0.11.0")))
+      (setq-local cider-jack-in-dependencies-exclusions '()))
     (it "uses them in a boot project"
       (expect (cider-inject-jack-in-dependencies "" "repl -s wait" 'boot)
               :to-equal (concat "-i \"(require 'cider.tasks)\""

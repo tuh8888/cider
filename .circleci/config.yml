@@ -20,7 +20,13 @@ commands:
       - checkout
       - run:
           name: Install Eldev
-          command: (iwr https://raw.github.com/doublep/eldev/master/webinstall/circle-eldev.ps1).Content | powershell -command -
+          command: |
+            # Remove expired DST Root CA X3 certificate. Workaround
+            # for https://debbugs.gnu.org/cgi/bugreport.cgi?bug=51038
+            # bug on Emacs 27.2.
+            gci cert:\LocalMachine\Root\DAC9024F54D8F6DF94935FB1732638CA6AD77C13
+            gci cert:\LocalMachine\Root\DAC9024F54D8F6DF94935FB1732638CA6AD77C13 | Remove-Item
+            (iwr https://raw.github.com/doublep/eldev/master/webinstall/circle-eldev.ps1).Content | powershell -command -
   test:
     steps:
       - run:
@@ -65,7 +71,8 @@ jobs:
     steps:
       - run:
           name: Install Emacs latest
-          command: choco install emacs
+          command: |
+            choco install emacs
       - setup-windows
       - test
 
@@ -74,15 +81,6 @@ jobs:
       - image: silex/emacs:27-dev
     steps:
       - setup
-      - lint
-
-  test-windows-lint:
-    executor: win/default
-    steps:
-      - run:
-          name: Install Emacs latest
-          command: choco install emacs
-      - setup-windows
       - lint
 
 workflows:
@@ -94,4 +92,3 @@ workflows:
       - test-emacs-master
       - test-lint
       - test-windows-emacs-latest
-      - test-windows-lint

@@ -123,6 +123,12 @@ file has been evaluated.
 TIP: `cider-auto-test-mode` is implemented in terms of this hook -
 tests are re-run every time you evaluate a file.
 
+You can use `cider-before-eval-hook` to trigger some action before eval
+request is sent to nrepl server.
+
+You can use `cider-after-eval-done-hook` to trigger some action after the
+eval response was received from nrepl server with status "done".
+
 == Synchronous vs Asynchronous Evaluation
 
 nREPL has an asynchronous evaluation model, where eval requests
@@ -154,6 +160,22 @@ for sync eval. You can adjust this default if needed:
 NOTE: CIDER internally increases the timeout to 30 seconds for the first sync eval request it does, as it might require a lot of namespaces and take more time to complete. See `cider--prep-interactive-eval` for details.
 
 == Configuration
+
+=== Display Spinner During Evaluation
+
+Some evaluation operations take a while to complete, so CIDER will display a
+visual indicator (a spinner) in the modeline to indicate this. The
+evaluation-in-progress spinner can be controlled by several variables:
+
+* `cider-eval-spinner-type` (default value `'progress-bar) -
+controls the appearance of the spinner. See `spinner-types`
+for all possible options.
+* `cider-eval-spinner-delay` controls the time (in seconds) after which to
+show the spinner. The default value is 1 second.
+* `cider-show-eval-spinner` controls whether to show the spinner at all.
+Set this variable to `nil` to disable it.
+
+NOTE: CIDER uses internally the excellent package https://github.com/Malabarba/spinner.el[spinner.el].
 
 === Overlays
 

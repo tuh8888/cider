@@ -35,7 +35,7 @@
   (it "handles nil input"
     (expect (cider-abbreviate-ns nil) :to-equal nil))
 
-  (it "handles empty string intput"
+  (it "handles empty string input"
     (expect (cider-abbreviate-ns "") :to-equal ""))
 
   (it "shortens all ns segments but the last"
@@ -48,7 +48,7 @@
   (it "handles nil input"
     (expect (cider-last-ns-segment nil) :to-equal nil))
 
-  (it "handles empty string intput"
+  (it "handles empty string input"
     (expect (cider-last-ns-segment "") :to-equal ""))
 
   (it "drops all ns segments but the last"
@@ -93,8 +93,6 @@
   ;; drive letter on windows.
   :var ((/docker/src (expand-file-name "/docker/src"))
         (/home/host/project/src (expand-file-name "/home/host/project/src"))
-        (/docker/src/namespace.clj (expand-file-name "/docker/src/namespace.clj"))
-        (/home/host/project/src/namespace.clj (expand-file-name "/home/host/project/src/namespace.clj"))
         (/home/host/random/file.clj (expand-file-name "/home/host/random/file.clj"))
         (/src (expand-file-name "/src"))
         (/host (expand-file-name "/host"))

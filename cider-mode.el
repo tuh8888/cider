@@ -42,7 +42,6 @@
 (require 'cider-inspector)
 (require 'cider-find)
 (require 'subr-x)
-(require 'cider-compat)
 
 (defcustom cider-mode-line-show-connection t
   "If the mode-line lighter should detail the connection."
@@ -250,7 +249,7 @@ If EVAL is non-nil the form will also be evaluated.  Use
         (let ((beg (point)))
           (insert form)
           (indent-region beg (point))
-          (cider--font-lock-ensure beg (point)))
+          (font-lock-ensure beg (point)))
         (when (if cider-invert-insert-eval-p
                   (not eval)
                 eval)
@@ -270,7 +269,7 @@ If invoked with a prefix ARG eval the expression after inserting it."
   (cider-insert-in-repl (cider-defun-at-point) arg))
 
 (defun cider-insert-region-in-repl (start end &optional arg)
-  "Insert the curent region in the REPL buffer.
+  "Insert the current region in the REPL buffer.
 START and END represent the region's boundaries.
 If invoked with a prefix ARG eval the expression after inserting it."
   (interactive "rP")
@@ -766,7 +765,7 @@ with the given LIMIT."
     value))
 
 (defun cider--compile-font-lock-keywords (symbols-plist core-plist)
-  "Return a list of font-lock rules for the symbols in SYMBOLS-PLIST and CORE-PLIST."
+  "Return a list of font-lock rules for symbols."
   (let ((cider-font-lock-dynamically (if (eq cider-font-lock-dynamically t)
                                          '(function var macro core deprecated)
                                        cider-font-lock-dynamically))
@@ -854,7 +853,7 @@ namespace itself."
                   (cider--compile-font-lock-keywords
                    symbols (cider-resolve-ns-symbols (cider-resolve-core-ns))))
       (font-lock-add-keywords nil cider--dynamic-font-lock-keywords 'end))
-    (cider--font-lock-flush)))
+    (font-lock-flush)))
 
 
 ;;; Detecting local variables
@@ -1085,7 +1084,7 @@ property."
     (font-lock-add-keywords nil cider--reader-conditionals-font-lock-keywords)
     (font-lock-remove-keywords nil cider--dynamic-font-lock-keywords)
     (font-lock-remove-keywords nil cider--static-font-lock-keywords)
-    (cider--font-lock-flush)
+    (font-lock-flush)
     (remove-hook 'completion-at-point-functions #'cider-complete-at-point t)))
 
 (defun cider-set-buffer-ns (ns)
