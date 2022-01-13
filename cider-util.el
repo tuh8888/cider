@@ -1,7 +1,7 @@
 ;; cider-util.el --- Common utility functions that don't belong anywhere else -*- lexical-binding: t -*-
 
 ;; Copyright © 2012-2013 Tim King, Phil Hagelberg, Bozhidar Batsov
-;; Copyright © 2013-2021 Bozhidar Batsov, Artur Malabarba and CIDER contributors
+;; Copyright © 2013-2022 Bozhidar Batsov, Artur Malabarba and CIDER contributors
 ;;
 ;; Author: Tim King <kingtim@gmail.com>
 ;;         Phil Hagelberg <technomancy@gmail.com>
@@ -375,7 +375,7 @@ propertized (defaults to current buffer)."
 (defvar cider-codename)
 
 (defun cider--pkg-version ()
-  "Extact CIDER's package version from its package metadata."
+  "Extract CIDER's package version from its package metadata."
   ;; FIXME: Inline the logic from package-get-version and adapt it
   (if (fboundp 'package-get-version)
       (package-get-version)
