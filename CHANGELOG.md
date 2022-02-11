@@ -5,13 +5,17 @@
 ### Changes
 
 * [#3127](https://github.com/clojure-emacs/cider/pull/3040): Strip all exec-opts flags (`-A` `-M` `-T` `-X`) if they exist in `cider-clojure-cli-aliases`. Also addresses a duplicate `:` in the generated `clj` command.
-* Enable `cider-enrich-classpath` by default again.
-  
+* Enable `cider-enrich-classpath` by default.
+* [#3148](https://github.com/clojure-emacs/cider/pull/3148): Display error messages in multiline comment eval results, and in result overlays when `cider-show-error-buffer` is set to nil.
+* [#3149](https://github.com/clojure-emacs/cider/pull/3149): Add option `'change` to `cider-eval-result-duration`, allowing multiple eval result overlays to persist until the next change to the buffer.
+
 ### Bugs fixed
 
 * Upgrade [enrich-classpath](https://github.com/clojure-emacs/enrich-classpath), which fixes various edge cases.
   * Remember: at the moment the enrich-classpath is disabled by default. It will soon be enabled again. If you wish to try it out, you can customize `cider-enrich-classpath` to `t`.
   * Also remember: for it to work, on Linux, you'll also have to do something like `sudo apt install openjdk-11-source` (depending on your package manager and JDK of choice).
+* [#3145](https://github.com/clojure-emacs/cider/pull/3145): Allow fallback to other `xref` backends if cider-nrepl is not loaded.
+* [#3148](https://github.com/clojure-emacs/cider/pull/3148): Fix eval result overlays at point inheriting the faces of following text.
 
 ## 1.2.0 (2021-12-22)
 
@@ -27,7 +31,7 @@
 * Make it possible to specify the version of `cider-nrepl` to use with `cider-jack-in`. See `cider-injected-middleware-version`.
 * Make it possible to specify the version of nREPL to use with `cider-jack-in`. See `cider-injected-nrepl-version`.
 * Upgrade `cider-nrepl`, `Orchard` and `clj-suitable` for pulling their latest bugfixes.
-* Add support for babaska projects to `cider-jack-in`.
+* Add support for babashka projects to `cider-jack-in`.
 * Introduce `cider-jack-in-lein-middlewares` defcustom.
 * [#3093](https://github.com/clojure-emacs/cider/pull/3093): Make `see-also`s clickable in ClojureDocs buffers.
 * [#3044](https://github.com/clojure-emacs/cider/pull/3044): Dynamically upgrade nREPL connection. See `cider-upgrade-nrepl-connection`.
