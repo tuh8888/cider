@@ -8,6 +8,8 @@
 * Enable `cider-enrich-classpath` by default.
 * [#3148](https://github.com/clojure-emacs/cider/pull/3148): Display error messages in multiline comment eval results, and in result overlays when `cider-show-error-buffer` is set to nil.
 * [#3149](https://github.com/clojure-emacs/cider/pull/3149): Add option `'change` to `cider-eval-result-duration`, allowing multiple eval result overlays to persist until the next change to the buffer.
+* `cider-jack-in-lein-plugins` no longer affects non-Leiningen projects.
+  * Third-party packages should rely on `cider-jack-in-dependencies` instead.
 
 ### Bugs fixed
 
@@ -16,6 +18,7 @@
   * Also remember: for it to work, on Linux, you'll also have to do something like `sudo apt install openjdk-11-source` (depending on your package manager and JDK of choice).
 * [#3145](https://github.com/clojure-emacs/cider/pull/3145): Allow fallback to other `xref` backends if cider-nrepl is not loaded.
 * [#3148](https://github.com/clojure-emacs/cider/pull/3148): Fix eval result overlays at point inheriting the faces of following text.
+* [#3133](https://github.com/clojure-emacs/cider/issues/3133): Respect `cider-injected-middleware-version`.
 
 ## 1.2.0 (2021-12-22)
 
