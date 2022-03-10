@@ -4,22 +4,33 @@
 
 ### Changes
 
-* [#3127](https://github.com/clojure-emacs/cider/pull/3040): Strip all exec-opts flags (`-A` `-M` `-T` `-X`) if they exist in `cider-clojure-cli-aliases`. Also addresses a duplicate `:` in the generated `clj` command.
-* Enable `cider-enrich-classpath` by default.
-* [#3148](https://github.com/clojure-emacs/cider/pull/3148): Display error messages in multiline comment eval results, and in result overlays when `cider-show-error-buffer` is set to nil.
+* Use clojure-mode [5.14.0](https://github.com/clojure-emacs/clojure-mode/blob/v5.14.0/CHANGELOG.md#5140-2022-03-07).
+
+## 1.3.0 (2021-03-07)
+
+### New features
+
+* [#3148](https://github.com/clojure-emacs/cider/pull/3148): Display error messages in multiline comment eval results, and in result overlays when `cider-show-error-buffer` is set to `nil`.
 * [#3149](https://github.com/clojure-emacs/cider/pull/3149): Add option `'change` to `cider-eval-result-duration`, allowing multiple eval result overlays to persist until the next change to the buffer.
+
+### Changes
+
+* [#3127](https://github.com/clojure-emacs/cider/pull/3040): Strip all exec-opts flags (`-A` `-M` `-T` `-X`) if they exist in `cider-clojure-cli-aliases`. Also addresses a duplicate `:` in the generated `clj` command.
 * `cider-jack-in-lein-plugins` no longer affects non-Leiningen projects.
   * Third-party packages should rely on `cider-jack-in-dependencies` instead.
 * Upgrade cider-nrepl to [0.28.3](https://github.com/clojure-emacs/cider-nrepl/blob/v0.28.3/CHANGELOG.md#0283-2022-02-22).
+* Remove `cider-jdk-src-paths` defcustom since enrich-classpath makes it redundant.
+* Remove `cider-resolve-java-class` function since enrich-classpath makes it redundant.
 
 ### Bugs fixed
 
 * Upgrade [enrich-classpath](https://github.com/clojure-emacs/enrich-classpath), which fixes various edge cases.
-  * Remember: at the moment the enrich-classpath is disabled by default. It will soon be enabled again. If you wish to try it out, you can customize `cider-enrich-classpath` to `t`.
+  * Remember: at the moment the enrich-classpath is disabled by default. If you wish to try it out, you can customize `cider-enrich-classpath` to `t`.
   * Also remember: for it to work, on Linux, you'll also have to do something like `sudo apt install openjdk-11-source` (depending on your package manager and JDK of choice).
 * [#3145](https://github.com/clojure-emacs/cider/pull/3145): Allow fallback to other `xref` backends if cider-nrepl is not loaded.
 * [#3148](https://github.com/clojure-emacs/cider/pull/3148): Fix eval result overlays at point inheriting the faces of following text.
 * [#3133](https://github.com/clojure-emacs/cider/issues/3133): Respect `cider-injected-middleware-version`.
+* [#3163](https://github.com/clojure-emacs/cider/pull/3163): `cider-clojuredocs`: prevent redundant prompt for a symbol.
 
 ## 1.2.0 (2021-12-22)
 

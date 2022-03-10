@@ -11,8 +11,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: http://www.github.com/clojure-emacs/cider
-;; Version: 1.3.0-snapshot
-;; Package-Requires: ((emacs "26") (clojure-mode "5.12") (parseedn "1.0.6") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2"))
+;; Version: 1.3.0
+;; Package-Requires: ((emacs "26") (clojure-mode "5.14") (parseedn "1.0.6") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2"))
 ;; Keywords: languages, clojure, cider
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -92,10 +92,10 @@
 (require 'sesman)
 (require 'package)
 
-(defconst cider-version "1.3.0-snapshot"
+(defconst cider-version "1.3.0"
   "The current version of CIDER.")
 
-(defconst cider-codename "Nice"
+(defconst cider-codename "Ukraine"
   "Codename used to denote stable releases.")
 
 (defcustom cider-lein-command
@@ -425,7 +425,7 @@ Should be newer than the required version for optimal results."
   :package-version '(cider . "1.2.0")
   :safe #'stringp)
 
-(defcustom cider-enrich-classpath t
+(defcustom cider-enrich-classpath nil
   "Whether to use git.io/JiJVX for adding sources and javadocs to the classpath.
 
 This is done in a clean manner, without interfering with classloaders.
@@ -485,7 +485,7 @@ returned by this function does not include keyword arguments."
                              `(("cider/cider-nrepl" ,cider-injected-middleware-version)
                                ("mx.cider/enrich-classpath" "1.9.0")))
                    (append cider-jack-in-lein-plugins
-                             `(("cider/cider-nrepl" ,cider-injected-middleware-version))))))
+                           `(("cider/cider-nrepl" ,cider-injected-middleware-version))))))
     (thread-last plugins
       (seq-filter
        (lambda (spec)
@@ -609,6 +609,7 @@ removed, LEIN-PLUGINS, LEIN-MIDDLEWARES and finally PARAMS."
    params))
 
 (defun cider--dedupe-deps (deps)
+  "Removes the duplicates in DEPS."
   (cl-delete-duplicates deps :test 'equal))
 
 (defun cider-clojure-cli-jack-in-dependencies (global-options _params dependencies)
