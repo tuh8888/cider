@@ -131,6 +131,22 @@ If you're fine with installing a third-party package for enhanced minibuffer
 completion you can't go wrong with the modern and versatile
 http://oremacs.com/2015/04/16/ivy-mode/[ivy].
 
+== Message Displayed on Connect
+
+By default CIDER will display an inspirational message when a new connection is
+established. This behavior is configurable via `cider-connection-message-fn`:
+
+[source,lisp]
+----
+;; make the message more educational
+(setq cider-connection-message-fn #'cider-random-tip)
+;; disable this extra message altogether
+(setq cider-connection-message-fn nil)
+----
+
+IMPORTANT: This is probably one of the most important CIDER features. Disable
+those amazing messages at your own risk!
+
 == Log nREPL Communications
 
 If you want to see all communications between CIDER and the nREPL
@@ -249,3 +265,24 @@ wrapping instead of line truncating.
 
 IMPORTANT: This variable should be set *before* loading CIDER (which means before
 `require`-ing it or autoloading it).
+
+== nREPL Connection Hooks
+
+CIDER provides the hooks `cider-connected-hook` and `cider-disconnected-hook`
+that get triggered when an nREPL connection is established or closed respectively.
+
+Here's how CIDER uses the first hook internally to display its famous inspirational
+messages on connect:
+
+[source,lisp]
+----
+(defun cider--maybe-inspire-on-connect ()
+  "Display an inspiration connection message."
+  (when cider-connection-message-fn
+    (message "Connected! %s" (funcall cider-connection-message-fn))))
+
+(add-hook 'cider-connected-hook #'cider--maybe-inspire-on-connect)
+----
+
+NOTE: There are also lower-level `nrepl-connected-hook` and `nrepl-disconnected-hook` that CIDER uses internally. Most of the time end-users would be better off using
+the CIDER-level hooks instead.

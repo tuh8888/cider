@@ -330,11 +330,10 @@ it's turned on."
      before-insert
      (point))))
 
-(defun cider-repl-history-target-overlay-at (position &optional no-error)
+(defun cider-repl-history-target-overlay-at (_position &optional no-error)
   "Return overlay at POSITION that has property `cider-repl-history-target'.
 If no such overlay, raise an error unless NO-ERROR is true, in which
 case return nil."
-  ;; FIXME: `position' is not used!
   (let ((ovs  (overlays-at (point))))
     (catch 'cider-repl-history-target-overlay-at
       (dolist (ov ovs)
@@ -352,7 +351,7 @@ Might error unless NO-ERROR set."
       (unless no-error
         (error "No CIDER history item in this buffer")))))
 
-(defun cider-repl-history-do-insert (buf pt)
+(defun cider-repl-history-do-insert (_buf pt)
   "Helper function to insert text from BUF at PT into the REPL buffer.
 Also kills *cider-repl-history*."
   ;; Note: as mentioned at the top, this file is based on browse-kill-ring,
@@ -364,7 +363,6 @@ Also kills *cider-repl-history*."
   ;; generic paste tool, but for inserting a previous command into an
   ;; interpreter, I felt the only useful option would be inserting it at the end
   ;; and quitting the history buffer, so that is all that's provided.
-  ;; FIXME: `buf' is not used!
   (let ((str (cider-repl-history-current-string pt)))
     (cider-repl-history-quit)
     (with-selected-window cider-repl-history-repl-window
