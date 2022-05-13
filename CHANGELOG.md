@@ -2,8 +2,17 @@
 
 ## master (unreleased)
 
+### Bugs fixed
+
+* [#3195](https://github.com/clojure-emacs/cider/issues/3195): Revert the change that resulted in `(error "Cyclic keymap inheritance")` on `cider-test-run-test`.
+
+## 1.4.0 (2022-05-02)
+
 ## New features
 
+* [#3188](https://github.com/clojure-emacs/cider/pull/3188): Add support for `undef-all` op, for removing stale vars and conflicting aliases.
+  * Add new command `cider-undef-all`.
+  * Existing commands `cider-load-buffer`, `cider-load-file`, and `cider-eval-ns-form` can be called with `C-u` prefix to execute `undef-all` before reloading the ns.
 * [#3185](https://github.com/clojure-emacs/cider/pull/3185): Add feature to `cider-eval-in-context` for automatically extracting parent let bindings when called with `C-u` prefix argument.
 * Add new interactive command `cider-inspire-me`. It does what you'd expect.
 * [#3162](https://github.com/clojure-emacs/cider/pull/3162): Save eval results into kill ring and registers.
@@ -22,7 +31,7 @@
 * [#3172](https://github.com/clojure-emacs/cider/issues/3172): Restore the long-lost (but critical) inspirational message on connect.
 * [#3186](https://github.com/clojure-emacs/cider/pull/3186): An assortment of small fixes.
 
-## 1.3.0 (2021-03-07)
+## 1.3.0 (2022-03-07)
 
 ### New features
 

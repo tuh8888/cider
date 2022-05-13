@@ -97,6 +97,17 @@
           (ansi-color-map (ansi-color-make-color-map)))
      ,@body))
 
+(defmacro text-property-make (foreground-color &optional style)
+  "Return FOREGROUND-COLOR and STYLE as a text property list."
+  (if (< emacs-major-version 28)
+      (if style
+          `(quote ((foreground-color . ,foreground-color) ,style))
+        `(quote (foreground-color . ,foreground-color)))
+    (if style
+        `(quote  (,(intern (concat  "ansi-color-" (symbol-name style)))
+                  (:foreground ,foreground-color)))
+      `(quote  (:foreground ,foreground-color)))))
+
 (describe "multiple calls to cider-repl--emit-output"
   (it "Multiple emit output calls set properties and emit text"
     (with-temp-buffer
@@ -136,29 +147,29 @@
         (expect (buffer-substring-no-properties (point-min) (point-max))
                 :to-equal "a\nb\nc\nd\ne\nf\ng\nh\ni\nj\n")
         (expect (get-text-property 1 'font-lock-face)
-                :to-equal '(foreground-color . "black"))
+                :to-equal (text-property-make "black"))
         (expect (get-text-property 3 'font-lock-face)
                 :to-equal 'cider-repl-stdout-face)
         (expect (get-text-property 5 'font-lock-face)
-                :to-equal '(foreground-color . "red3"))
+                :to-equal (text-property-make "red3"))
         (expect (get-text-property 7 'font-lock-face)
-                :to-equal '(foreground-color . "green3"))
+                :to-equal (text-property-make "green3"))
         (expect (get-text-property 9 'font-lock-face)
-                :to-equal '(foreground-color . "yellow3"))
+                :to-equal (text-property-make "yellow3"))
         (expect (get-text-property 11 'font-lock-face)
-                :to-equal '(foreground-color . "red3"))
+                :to-equal (text-property-make "red3"))
         (expect (get-text-property 13 'font-lock-face)
-                :to-equal '(foreground-color . "green3"))
+                :to-equal (text-property-make "green3"))
         (expect (get-text-property 15 'font-lock-face)
-                :to-equal '((foreground-color . "yellow3") bold))
+                :to-equal (text-property-make "yellow3" bold))
         (expect (get-text-property 17 'font-lock-face)
-                :to-equal '(foreground-color . "red3"))
+                :to-equal (text-property-make "red3"))
         (expect (get-text-property 19 'font-lock-face)
-                :to-equal '((foreground-color . "green3") italic))
+                :to-equal (text-property-make "green3" italic))
         ))))
 
 (defun simulate-cider-output (s property)
-  "Return properties from `cider-repl--emit-output'.
+  "Return S's properties from `cider-repl--emit-output'.
 PROPERTY should be a symbol of either 'text, 'ansi-context or
 'properties."
   (let ((strings (if (listp s) s (list s))))
@@ -181,28 +192,7 @@ PROPERTY should be a symbol of either 'text, 'ansi-context or
   (describe "when the escape code is invalid"
     (it "doesn't hold the string looking for a close tag"
       (expect (simulate-cider-output "\033hi" 'text)
-              :to-equal "\033hi\n")
-      (expect (simulate-cider-output "\033hi" 'ansi-context)
-              :to-equal nil)
-
-      ;; Informational: Ideally, we would have liked any non-SGR
-      ;; sequence to appear on the output verbatim, but as per the
-      ;; `ansi-color-apply' doc string, they are removed
-      ;;
-      ;; """Translates SGR control sequences into text properties.
-      ;;    Delete all other control sequences without processing them."""
-      ;;
-      ;; e.g.:
-      (expect (simulate-cider-output
-               "\033[hi" 'text) :to-equal "i\n")
-      (expect (simulate-cider-output
-               '("\033[" "hi") 'text) :to-equal "i\n")
-      ))
-
-  (describe "when the escape code is valid"
-    (it "preserves the context"
-      (let ((context (simulate-cider-output "[30ma[0mb[31mcd" 'ansi-context)))
-        (expect context :to-equal '((31) nil))))))
+              :to-equal "\033hi\n"))))
 
 (describe "cider-locref-at-point"
   (it "works with stdout-stacktrace refs"

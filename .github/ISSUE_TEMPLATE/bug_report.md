@@ -30,10 +30,9 @@ CIDER's REPL is launched. Here's an example:*
 ;; Clojure 1.8.0, Java 1.8.0_31
 ```
 
-### Lein/Boot version
+### Lein / Clojure CLI version
 
-*E.g. Lein 2.6.1* (skip this when you didn't start the nREPL server
-using Lein or Boot)
+*E.g. Lein 2.6.1* 
 
 ### Emacs version
 
@@ -42,3 +41,13 @@ using Lein or Boot)
 ### Operating system
 
 *E.g. Fedora 23, OS X 10.11 "El Capitan", Windows 10, etc*
+
+### JDK distribution
+
+*The JDK distribution are you using (e.g. Oracle, Temurin, Corretto), and its version. (run `java -version` for obtaining this)*
+
+*Please note that you should be running a JDK, not a JRE.*
+
+*If you are using a JDK through Docker, please indicate the Docker image being used.*
+
+*Please note that especially on Linux, JDK sources may be absent by default and require a separate installation step.*
