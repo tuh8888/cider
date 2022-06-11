@@ -302,6 +302,49 @@ You can also use the command `cider-kill-last-result`(kbd:[C-c C-v k]) after any
 eval command to store its result in the kill ring. This works even when the
 `cider-eval-register` feature is disabled.
 
+=== Evaluating code inside comments
+
+By default, when using the defun-level eval commands inside a top-level `comment` form the return value is always `nil`. Calling `cider-eval-defun-up-to-point` with point at `<point>` also returns `nil`:
+
+[source,clojure]
+----
+(comment
+  (let [b "str"]
+    (-> b
+        keyword<point> ;;=> nil
+        name))
+  *e)
+----
+
+That's not a bug, that's simply how the `comment` form works (it simply returns
+`nil` when evaluated).  However, it is often desirable to treat the form the
+point is in as if was not inside a comment. To help with this `clojure-mode`
+supplies the variable `clojure-toplevel-inside-comment-form`. If this variable
+is set to `t` then `defun`-level commands will ignore the `comment`
+wrapper. Let's revisit the previous example:
+
+[source,clojure]
+----
+(comment
+  (let [b "str"]
+    (-> b
+        keyword<point> ;;=> :str
+        name))
+  *e)
+----
+
+With `cider-eval-defun-at-point` we get:
+
+[source,clojure]
+----
+(comment
+  (let [b "str"]
+    (-> b
+        keyword<point>
+        name)) ;;=> "str"
+  *e)
+----
+
 
 == Keybindings
 
