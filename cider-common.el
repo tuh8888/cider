@@ -263,7 +263,8 @@ otherwise, nil."
   (let* ((buffer (or buffer (current-buffer)))
          (name (replace-regexp-in-string "^file:" "" name))
          (name (concat (cider-tramp-prefix buffer) name)))
-    (if (tramp-handle-file-exists-p name)
+    (if (and (tramp-tramp-file-p name)
+             (tramp-handle-file-exists-p name))
         name)))
 
 (defun cider--server-filename (name)
@@ -286,7 +287,7 @@ in the container, the alist would be `((\"/src\" \"~/projects/foo/src\"))."
 (defun cider--translate-path (path direction)
   "Attempt to translate the PATH in the given DIRECTION.
 Looks at `cider-path-translations' for (container . host) alist of path
-prefixes and translates PATH from container to host or viceversa depending on
+prefixes and translates PATH from container to host or vice-versa depending on
 whether DIRECTION is 'from-nrepl or 'to-nrepl."
   (seq-let [from-fn to-fn path-fn] (cond ((eq direction 'from-nrepl) '(car cdr identity))
                                          ((eq direction 'to-nrepl) '(cdr car expand-file-name)))

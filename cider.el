@@ -11,8 +11,8 @@
 ;;         Steve Purcell <steve@sanityinc.com>
 ;; Maintainer: Bozhidar Batsov <bozhidar@batsov.dev>
 ;; URL: http://www.github.com/clojure-emacs/cider
-;; Version: 1.5.0-snapshot
-;; Package-Requires: ((emacs "26") (clojure-mode "5.14") (parseedn "1.0.6") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2"))
+;; Version: 1.5.0
+;; Package-Requires: ((emacs "26") (clojure-mode "5.15.1") (parseedn "1.0.6") (queue "0.2") (spinner "1.7") (seq "2.22") (sesman "0.3.2"))
 ;; Keywords: languages, clojure, cider
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -92,10 +92,10 @@
 (require 'sesman)
 (require 'package)
 
-(defconst cider-version "1.5.0-snapshot"
+(defconst cider-version "1.5.0"
   "The current version of CIDER.")
 
-(defconst cider-codename "Kyiv"
+(defconst cider-codename "Strasbourg"
   "Codename used to denote stable releases.")
 
 (defcustom cider-lein-command
@@ -158,7 +158,7 @@ default to \"powershell\"."
 (defcustom cider-clojure-cli-aliases
   nil
   "A list of aliases to include when using the clojure cli.
-Alias names should be of the form `:foo:bar`.
+Alias names should be of the form \":foo:bar\".
 Leading \"-A\" \"-M\" \"-T\" or \"-X\" are stripped from aliases
 then concatenated into the \"-M[your-aliases]:cider/nrepl\" form."
   :type 'string
@@ -189,14 +189,14 @@ By default we favor the project-specific shadow-cljs over the system-wide."
   :package-version '(cider . "0.17.0"))
 
 (defcustom cider-gradle-command
-  "gradle"
+  "./gradlew"
   "The command used to execute Gradle."
   :type 'string
   :safe #'stringp
   :package-version '(cider . "0.10.0"))
 
 (defcustom cider-gradle-global-options
-  "--no-daemon"
+  ""
   "Command line options used to execute Gradle (e.g.: -m for dry run)."
   :type 'string
   :safe #'stringp
@@ -352,7 +352,11 @@ Throws an error if PROJECT-TYPE is unknown."
     ('shadow-cljs (let ((parts (split-string cider-shadow-cljs-command)))
                     (when-let* ((command (cider--resolve-command (car parts))))
                       (mapconcat #'identity (cons command (cdr parts)) " "))))
-    ('gradle (cider--resolve-command cider-gradle-command))
+    ;; here we have to account for use of the Gradle wrapper which is
+    ;; a shell script within their project, so if they have a clearly
+    ;; relative path like "./gradlew" use locate file instead of checking
+    ;; the exec-path
+    ('gradle (cider--resolve-project-command cider-gradle-command))
     (_ (user-error "Unsupported project type `%S'" project-type))))
 
 (defun cider-jack-in-global-options (project-type)
@@ -387,7 +391,7 @@ Throws an error if PROJECT-TYPE is unknown."
   "List of dependencies where elements are lists of artifact name and version.")
 (put 'cider-jack-in-dependencies 'risky-local-variable t)
 
-(defcustom cider-injected-nrepl-version "0.9.0"
+(defcustom cider-injected-nrepl-version "1.0.0"
   "The version of nREPL injected on jack-in.
 We inject the newest known version of nREPL just in case
 your version of Boot or Leiningen is bundling an older one."
@@ -445,8 +449,8 @@ which will be the lowest version CIDER supports.  If a string, use this as
 the version number.  If it is a list, the first element should be a string,
 specifying the artifact ID, and the second element the version number."
   :type '(choice (const :tag "None" nil)
-                 (const :tag "Latest" 'latest)
-                 (const :tag "Minimal" 'minimal)
+                 (const :tag "Latest" latest)
+                 (const :tag "Minimal" minimal)
                  (string :tag "Specific Version")
                  (list :tag "Artifact ID and Version"
                        (string :tag "Artifact ID")
@@ -572,6 +576,49 @@ and MIDDLEWARES.  PARAMS and MIDDLEWARES are passed on to
           "-i \"(require 'cider.tasks)\" " ;; Note the space at the end here
           (cider-boot-dependencies (append (cider--jack-in-required-dependencies) dependencies))
           (cider-boot-middleware-task params middlewares)))
+
+(defun cider--gradle-dependency-notation (dependency)
+  "Returns Gradle's GAV dependency syntax.
+For a \"group/artifact\" \"version\") DEPENDENCY list
+return as group:artifact:version notation."
+  (let ((group-artifact (replace-regexp-in-string "/" ":" (car dependency)))
+        (version (cadr dependency)))
+    (format "%s:%s" group-artifact version)))
+
+(defun cider--gradle-jack-in-property (dependencies)
+  "Returns Clojurephant's dependency jack-in property.
+For DEPENDENCIES, translates to Gradle's dependency notation
+using `cider--gradle-dependency-notation`.''"
+  (if (seq-empty-p dependencies)
+      ""
+    (shell-quote-argument
+     (concat "-Pdev.clojurephant.jack-in.nrepl="
+             (mapconcat #'cider--gradle-dependency-notation dependencies ",")))))
+
+(defun cider--gradle-middleware-params (middlewares)
+  "Returns Gradle-formatted middleware params.
+Given a list of MIDDLEWARES symbols, this returns
+the Gradle parameters expected by Clojurephant's
+ClojureNRepl task."
+  (mapconcat (lambda (middleware)
+               (shell-quote-argument (concat "--middleware=" middleware)))
+             middlewares
+             " "))
+
+(defun cider-gradle-jack-in-dependencies (global-opts params dependencies middlewares)
+  "Create gradle jack in dependencies.
+Does so by concatenating GLOBAL-OPTS, DEPENDENCIES,
+and MIDDLEWARES.  GLOBAL-OPTS and PARAMS are taken as-is.
+DEPENDENCIES are translated into Gradle's typical
+group:artifact:version notation and MIDDLEWARES are
+prepared as arguments to Clojurephant's ClojureNRepl task."
+  (concat global-opts
+          (unless (seq-empty-p global-opts) " ")
+          (cider--gradle-jack-in-property (append (cider--jack-in-required-dependencies) dependencies))
+          " "
+          params
+          (unless (seq-empty-p params) " ")
+          (cider--gradle-middleware-params middlewares)))
 
 (defun cider--lein-artifact-exclusions (exclusions)
   "Return an exclusions vector described by the elements of EXCLUSIONS."
@@ -713,10 +760,12 @@ dependencies."
                    params
                    (cider-add-clojure-dependencies-maybe
                     cider-jack-in-dependencies)))
-    ('gradle (concat
+    ('gradle (cider-gradle-jack-in-dependencies
               global-opts
-              (unless (seq-empty-p global-opts) " ")
-              params))
+              params
+              (cider-add-clojure-dependencies-maybe
+               cider-jack-in-dependencies)
+              (cider-jack-in-normalized-nrepl-middlewares)))
     (_ (error "Unsupported project type `%S'" project-type))))
 
 
@@ -1576,10 +1625,11 @@ of remote SSH hosts."
 When DIR is non-nil also look for nREPL port files in DIR.  Return a list
 of list of the form (project-dir port)."
   (let* ((paths (cider--running-nrepl-paths))
-         (proj-ports (mapcar (lambda (d)
-                               (when-let* ((port (and d (nrepl-extract-port (cider--file-path d)))))
-                                 (list (file-name-nondirectory (directory-file-name d)) port)))
-                             (cons (clojure-project-dir dir) paths))))
+         (proj-ports (apply #'append
+                            (mapcar (lambda (d)
+                                      (mapcar (lambda (p) (list (file-name-nondirectory (directory-file-name d)) p))
+                                              (and d (nrepl-extract-ports (cider--file-path d)))))
+                                    (cons (clojure-project-dir dir) paths)))))
     (seq-uniq (delq nil proj-ports))))
 
 (defun cider--running-nrepl-paths ()
@@ -1651,6 +1701,14 @@ assume the command is available."
                            (executable-find command)
                            (executable-find (concat command ".bat")))))
     (shell-quote-argument command)))
+
+(defun cider--resolve-project-command (command)
+  "Find COMMAND in project dir or exec path (see variable `exec-path').
+If COMMAND starts with ./ or ../ resolve relative to `clojure-project-dir',
+otherwise resolve via `cider--resolve-command'."
+  (if (string-match-p "\\`\\.\\{1,2\\}/" command)
+      (locate-file command (list (clojure-project-dir)) '("" ".bat") 'executable)
+    (cider--resolve-command command)))
 
 (defcustom cider-connection-message-fn #'cider-random-words-of-inspiration
   "The function to use to generate the message displayed on connect.
