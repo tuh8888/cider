@@ -217,7 +217,8 @@ Add to this list to have CIDER recognize additional test defining macros."
   (when cider-special-mode-truncate-lines
     (setq-local truncate-lines t))
   (setq-local sesman-system 'CIDER)
-  (setq-local electric-indent-chars nil))
+  (setq-local electric-indent-chars nil)
+  (buffer-disable-undo))
 
 ;; Report navigation
 
@@ -477,6 +478,12 @@ With the actual value, the outermost '(not ...)' s-expression is removed."
                       (cider-test-render-assertion buffer test)))))
               vars))
            results)))
+      ;; Replace any newline chars with actual newlines to make long error
+      ;; messages more readable
+      (goto-char (point-min))
+      (while (search-forward "\\n" nil t)
+        (replace-match "
+"))
       (goto-char (point-min))
       (current-buffer))))
 

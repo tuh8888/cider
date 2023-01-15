@@ -2,13 +2,39 @@
 
 ## master (unreleased)
 
+### New features
+
+- [#3262](https://github.com/clojure-emacs/cider/issues/3262): Add navigation functionality to `npfb` keys inside the data inspector's buffer.
+
+### Changes
+
+- Allow using `npx nbb` as `cider-nbb-command`.
+- [#3281](https://github.com/clojure-emacs/cider/pull/3281): Replace newline chars with actual newlines in `*cider-test-report*` buffer, for prettier error messages.
+
+## 1.6.0 (2022-12-21)
+
+### New features
+
+- [#3278](https://github.com/clojure-emacs/cider/pull/3278): Introduce integration tests, which also fix a long standing issue with orphaned process on MS-Windows by contracting `taskkill`, if available, to properly kill the nREPL server process tree.
+- [#3061](https://github.com/clojure-emacs/cider/issues/3061): Add support for `nbb`.
+- [#3249](https://github.com/clojure-emacs/cider/pull/3249): Add support for Clojure Spec 2.
+- [#3247](https://github.com/clojure-emacs/cider/pull/3247): Add the `cider-stacktrace-analyze-at-point` and `cider-stacktrace-analyze-in-region` commands to view printed exceptions in the stacktrace inspector.
+
 ### Changes
 
 - Bump the injected nREPL version to 1.0.
+- [#3061](https://github.com/clojure-emacs/cider/issues/3061): Allow to use `cider-connect-clj` for self-hosted cljs repls (e.g. `nbb`).
+- [#3291](https://github.com/clojure-emacs/cider/pull/3291): **Remove** the `'cljs-pending` `repl-type`. It is replaced by `cider-repl-cljs-upgrade-pending`.
+- [#3261](https://github.com/clojure-emacs/cider/issues/3261): If user is connecting to nREPL from a TRAMP buffer, use its connection parameters (port, username) for establishing SSH tunnel.
 
 ### Bugs fixed
 
-- Remove needless quotes from the choices of `cider-jack-in-auto-inject-clojure`
+- Remove needless quotes from the choices of `cider-jack-in-auto-inject-clojure`.
+- [#2561](https://github.com/clojure-emacs/cider/issues/2561): Disable undo in `*cider-test-report*` buffers.
+- [#3251](https://github.com/clojure-emacs/cider/pull/3251): Disable undo in `*cider-stacktrace*` buffers.
+- Consecutive overlays will not be spuriously deleted.
+- [#3260](https://github.com/clojure-emacs/cider/pull/3260): Scroll REPL buffer in other frame.
+- [#3293](https://github.com/clojure-emacs/cider/issues/3293): Can't jack in to more than one `bb` projects.
 
 ## 1.5.0 (2022-08-24)
 

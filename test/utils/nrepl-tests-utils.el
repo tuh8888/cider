@@ -25,6 +25,9 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+(require 'nrepl-client)
+
 (defmacro nrepl-tests-log/init! (enable? name log-filename &optional clean?)
   "Create a NAME/log! elisp function to log messages to LOG-FILENAME,
 taking the same arguments as `message'. Messages are appended to
@@ -57,14 +60,18 @@ same file).
       `(defmacro ,log-symbol (fmt &rest rest)
          '()))))
 
-(defmacro nrepl-tests-sleep-until (timeout-secs condition)
-  "Sleep for up to TIMEOUT-SECS or until CONDITION becomes true. It wakes
-up every 0.2 seconds to check for CONDITION."
+(defmacro nrepl-tests-poll-until (condition timeout-secs)
+  "Poll every 0.2 secs until CONDITION becomes true or error out if TIMEOUT-SECS elapses."
   (let* ((interval-secs 0.2)
          (count (truncate (/ timeout-secs interval-secs))))
     `(cl-loop repeat ,count
-              until ,condition
-              do (sleep-for ,interval-secs))))
+              for condition = ,condition
+              if condition
+                return condition
+              else
+                do (sleep-for ,interval-secs)
+              finally (error ":cider-tests-poll-until-errored :timed-out-after-secs %d :waiting-for %S"
+                             ,timeout-secs (quote ,condition)))))
 
 (defun nrepl-server-mock-invocation-string ()
   "Return a shell command that can be used by nrepl-start-srever-process to
@@ -97,5 +104,16 @@ calling process."
           ;; invoke mock server
           " -l test/nrepl-server-mock.el -f nrepl-server-mock-start"))
 
+(defun nrepl-start-mock-server-process ()
+  "Start and return the mock nrepl server process."
+  (let ((server-process (nrepl-start-server-process
+                          default-directory
+                          (nrepl-server-mock-invocation-string)
+                          (lambda (_server-buffer)
+                            (message ":nrepl-mock-server-process-started...")))))
+    server-process))
 
 (provide 'nrepl-tests-utils)
+
+;;; nrepl-tests-utils.el ends here
+

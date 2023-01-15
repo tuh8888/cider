@@ -555,11 +555,12 @@
               "(do (require '[shadow.cljs.devtools.api :as shadow]) (shadow/browser-repl))")))
   (describe "can watch multiple builds"
     (it "watches 2 builds and selects user-defined builds"
-      (setq-local cider-shadow-default-options "client-build")
-      (setq-local cider-shadow-watched-builds '("client-build" "other-build"))
-      (expect (cider-shadow-cljs-init-form)
-              :to-equal
-              "(do (require '[shadow.cljs.devtools.api :as shadow]) (shadow/watch :client-build) (shadow/watch :other-build) (shadow/nrepl-select :client-build))"))))
+      (with-temp-buffer
+        (setq-local cider-shadow-default-options "client-build")
+        (setq-local cider-shadow-watched-builds '("client-build" "other-build"))
+        (expect (cider-shadow-cljs-init-form)
+                :to-equal
+                "(do (require '[shadow.cljs.devtools.api :as shadow]) (shadow/watch :client-build) (shadow/watch :other-build) (shadow/nrepl-select :client-build))")))))
 
 (describe "cider--resolve-project-command"
   (it "if command starts with ./ it resolves relative to clojure-project-dir"
@@ -577,6 +578,57 @@
     (spy-on 'executable-find :and-return-value "/bin/command")
     (expect (cider--resolve-project-command "command")
             :to-equal (shell-quote-argument "/bin/command"))))
+
+(describe "cider-connect-sibling-cljs"
+  ;; restore:
+  ;; - `cider-cljs-repl-types` changed by `cider-register-cljs-repl-type`.
+  :var (-cider-cljs-repl-types)
+  (before-all
+   (setq -cider-cljs-repl-types cider-cljs-repl-types))
+  (after-each
+   (setq cider-cljs-repl-types -cider-cljs-repl-types))
+
+  (describe "sets nrepl client buffer local vars correctly"
+    ;; we only care to test in the below that some well specified local vars are
+    ;; set in the nREPL client buffer at start up. To do so, we bring up the
+    ;; mock server and call `cider-connect-sibling-cljs` to establish the
+    ;; connection.
+    (it "for a custom cljs REPL type project"
+      (with-temp-buffer
+        (cider-register-cljs-repl-type 'native-cljs)
+        (let* ((server-process (nrepl-start-mock-server-process))
+               (server-buffer (process-buffer server-process)))
+          ;; wait for the connection to be established
+          (nrepl-tests-poll-until (local-variable-p 'nrepl-endpoint server-buffer) 5)
+          (let ((client-buffer (cider-connect-sibling-cljs
+                                `(:cljs-repl-type native-cljs :repl-buffer ,(current-buffer))
+                                server-buffer)))
+            (expect (buffer-local-value 'cider-repl-type client-buffer)
+                    :to-equal 'cljs)
+            (expect (buffer-local-value 'cider-repl-cljs-upgrade-pending client-buffer)
+                    :to-equal nil)
+            ;; kill server
+            (delete-process (get-buffer-process client-buffer))))))
+    (it "for a custom REPL type project that needs to switch to cljs"
+      (with-temp-buffer
+        (cider-register-cljs-repl-type
+         'not-cljs-initially "(form-to-switch-to-cljs-repl)")
+        (let* ((server-process (nrepl-start-mock-server-process))
+               (server-buffer (process-buffer server-process)))
+          ;; wait for the connection to be established
+          (nrepl-tests-poll-until (local-variable-p 'nrepl-endpoint server-buffer) 5)
+          (let ((client-buffer (cider-connect-sibling-cljs
+                                `(:cljs-repl-type not-cljs-initially
+                                  :repl-buffer ,(current-buffer))
+                                server-buffer)))
+            (expect (buffer-local-value 'cider-repl-type client-buffer)
+                    :to-equal 'cljs)
+            (expect (buffer-local-value 'cider-repl-cljs-upgrade-pending client-buffer)
+                    :to-equal t)
+            (expect (buffer-local-value 'cider-repl-init-function client-buffer)
+                    :not :to-be nil)
+            ;; kill server
+            (delete-process (get-buffer-process client-buffer))))))))
 
 (provide 'cider-tests)
 
